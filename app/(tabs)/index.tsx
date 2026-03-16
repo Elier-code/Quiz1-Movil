@@ -1,98 +1,197 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import {
+  StyleSheet,
+  View,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { useState } from "react";
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  type Dispositivo = {
+    id: number;
+    nombre: string;
+    tipo: string;
+  };
+  const text ="No hay dispositivos Registrados"
+  const [mensaje, setMensaje] = useState(text);
+  const [dispositivo, setDispositivo] = useState("");
+  const [tipoDis, setTipoDis] = useState("");
+  const [lista, setLista] = useState<Dispositivo[]>([]);
+  const [contador,setContador] = useState(1)
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const registrar = () => {
+    if (dispositivo === "" && tipoDis === "") {
+      alert("Complete todos los campos");
+    } else {
+      const n = lista.length + 1
+      const newDisp = {
+        id: contador,
+        nombre: dispositivo,
+        tipo: tipoDis,
+      };
+      setLista([...lista, newDisp]);
+      
+      setMensaje("Hay " + n + " dispositivos registrados");
+    }
+    setDispositivo("");
+    setTipoDis("");
+    setContador(contador + 1)
+  };
+
+  const eliminar = (id: number) => {
+    const nuevaLista = lista.filter((item) => item.id !== id);
+    if(nuevaLista.length !== 0){
+      setMensaje("Hay " + (nuevaLista.length) + " dispositivos registrados");
+    }else{
+      setMensaje(text)
+    }
+    setLista(nuevaLista);
+  };
+
+  return (
+    <View style={styles.body}>
+      <Image
+        source={require("../../assets/images/cecar.png")}
+        style={styles.imagen}
+      />
+      <View style={styles.contenedor}>
+        <Text style={styles.titulo}>Registro de dispositivos</Text>
+        <View style={styles.contRegistro}>
+          <TextInput
+            placeholder="Nombre Dispositivo"
+            value={dispositivo}
+            onChangeText={setDispositivo}
+            style={styles.input}
+          />
+          <Picker
+            selectedValue={tipoDis}
+            onValueChange={(itemValue) => setTipoDis(itemValue)}
+            
+          >
+            <Picker.Item label="Seleccione tipo de dispositivo" value="" />
+            <Picker.Item label="Portatil" value="Portatil" />
+            <Picker.Item label="Celular" value="Celular" />
+            <Picker.Item label="Tablet" value="Tablet" />
+          </Picker>
+        </View>
+        <TouchableOpacity onPress={registrar}>
+          <Text>Registrar</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.mensaje}>{mensaje}</Text>
+      <View style={styles.tabla}>
+        <Text style={[styles.titulo,{margin:10}]}>Registro</Text>
+        <View style={styles.fila}>
+          <Text style={styles.encabezado}>Id</Text>
+          <Text style={styles.encabezado}>Nombre</Text>
+          <Text style={styles.encabezado}>Tipo</Text>
+          <Text style={styles.encabezado}>Eliminar</Text>
+        </View>
+        <FlatList
+          data={lista}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.fila}>
+              <Text style={styles.columna}>{item.id}</Text>
+              <Text style={styles.columna}>{item.nombre}</Text>
+              <Text style={styles.columna}>{item.tipo}</Text>
+              <TouchableOpacity
+                style={{ flex: 1, alignItems: "center" }}
+                onPress={() => {
+                  eliminar(item.id);
+                }}
+              >
+                <Text style={styles.eliminar}>{"\u{1F5D1}"}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  body: {
+    backgroundColor: "#000",
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 10,
+    padding: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  imagen: {
+    width: 400,
+    height: 90,
+    resizeMode: "contain",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  contenedor: {
+    backgroundColor: "#164f1e",
+    width: 300,
+    alignItems: "center",
+    marginTop: 40,
+    gap: 10,
+    padding: 17,
+    borderRadius:30
+  },
+  titulo: {
+    color: "#f1f2d2",
+    fontSize: 23,
+    fontStyle: "italic",
+    fontWeight: "bold",
+  },
+  contRegistro: {
+    gap: 7,
+    width:'80%'
+  },
+  input: {
+    backgroundColor: "#daecbb",
+    color: "#000",
+    padding: 3,
+    
+  },
+  picker:{
+    backgroundColor: "#daecbb",
+    height:40,
+    padding:0
+  },
+  mensaje: {
+    color: "#fff",
+  },
+  tabla: {
+    backgroundColor: "#497f23",
+    padding: 5,
+    width: 300,
+    alignItems: "center",
+    paddingBottom:20,
+    borderRadius:30
+  },
+  fila: {
+    flexDirection: "row",
+    margin: 0,
+    alignItems: "center",
+    width: 250,
+    borderWidth: 1,
+  },
+  encabezado: {
+    width: "25%",
+    fontWeight: "bold",
+    color: "#f1f2d2",
+    textAlign: "center",
+
+    paddingVertical: 8,
+  },
+  columna: {
+    width: "25%",
+    textAlign: "center",
+    paddingVertical: 8,
+  },
+  eliminar: {
+    fontSize: 28,
+    color: "#ff0000",
   },
 });

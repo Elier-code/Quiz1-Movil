@@ -1,3 +1,4 @@
+
 import {
   StyleSheet,
   View,
@@ -16,39 +17,49 @@ export default function HomeScreen() {
     nombre: string;
     tipo: string;
   };
-  const text ="No hay dispositivos Registrados"
+
+  const text = "No hay dispositivos Registrados";
+
   const [mensaje, setMensaje] = useState(text);
   const [dispositivo, setDispositivo] = useState("");
   const [tipoDis, setTipoDis] = useState("");
   const [lista, setLista] = useState<Dispositivo[]>([]);
-  const [contador,setContador] = useState(1)
+  const [contador, setContador] = useState(1);
 
   const registrar = () => {
     if (dispositivo === "" && tipoDis === "") {
       alert("Complete todos los campos");
     } else {
-      const n = lista.length + 1
+      const n = lista.length + 1;
+
       const newDisp = {
         id: contador,
         nombre: dispositivo,
         tipo: tipoDis,
       };
+
       setLista([...lista, newDisp]);
-      
       setMensaje("Hay " + n + " dispositivos registrados");
     }
+
     setDispositivo("");
     setTipoDis("");
-    setContador(contador + 1)
+    setContador(contador + 1);
   };
 
   const eliminar = (id: number) => {
-    const nuevaLista = lista.filter((item) => item.id !== id);
-    if(nuevaLista.length !== 0){
-      setMensaje("Hay " + (nuevaLista.length) + " dispositivos registrados");
-    }else{
-      setMensaje(text)
+    const nuevaLista = lista.filter(
+      (item: Dispositivo) => item.id !== id
+    );
+
+    if (nuevaLista.length !== 0) {
+      setMensaje(
+        "Hay " + nuevaLista.length + " dispositivos registrados"
+      );
+    } else {
+      setMensaje(text);
     }
+
     setLista(nuevaLista);
   };
 
@@ -58,8 +69,10 @@ export default function HomeScreen() {
         source={require("../../assets/images/cecar.png")}
         style={styles.imagen}
       />
+
       <View style={styles.contenedor}>
         <Text style={styles.titulo}>Registro de dispositivos</Text>
+
         <View style={styles.contRegistro}>
           <TextInput
             placeholder="Nombre Dispositivo"
@@ -67,45 +80,60 @@ export default function HomeScreen() {
             onChangeText={setDispositivo}
             style={styles.input}
           />
+
           <Picker
             selectedValue={tipoDis}
-            onValueChange={(itemValue) => setTipoDis(itemValue)}
-            
+            onValueChange={(itemValue: string) =>
+              setTipoDis(itemValue)
+            }
           >
-            <Picker.Item label="Seleccione tipo de dispositivo" value="" />
+            <Picker.Item
+              label="Seleccione tipo de dispositivo"
+              value=""
+            />
             <Picker.Item label="Portatil" value="Portatil" />
             <Picker.Item label="Celular" value="Celular" />
             <Picker.Item label="Tablet" value="Tablet" />
           </Picker>
         </View>
-        <TouchableOpacity onPress={registrar}>
+
+        <TouchableOpacity onPress={registrar} style={styles.button}>
           <Text>Registrar</Text>
         </TouchableOpacity>
       </View>
+
       <Text style={styles.mensaje}>{mensaje}</Text>
+
       <View style={styles.tabla}>
-        <Text style={[styles.titulo,{margin:10}]}>Registro</Text>
+        <Text style={[styles.titulo, { margin: 10 }]}>
+          Registro
+        </Text>
+
         <View style={styles.fila}>
           <Text style={styles.encabezado}>Id</Text>
           <Text style={styles.encabezado}>Nombre</Text>
           <Text style={styles.encabezado}>Tipo</Text>
           <Text style={styles.encabezado}>Eliminar</Text>
         </View>
-        <FlatList
+
+        <FlatList<Dispositivo>
           data={lista}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
+          keyExtractor={(item: Dispositivo) =>
+            item.id.toString()
+          }
+          renderItem={({ item }: { item: Dispositivo }) => (
             <View style={styles.fila}>
               <Text style={styles.columna}>{item.id}</Text>
               <Text style={styles.columna}>{item.nombre}</Text>
               <Text style={styles.columna}>{item.tipo}</Text>
+
               <TouchableOpacity
                 style={{ flex: 1, alignItems: "center" }}
-                onPress={() => {
-                  eliminar(item.id);
-                }}
+                onPress={() => eliminar(item.id)}
               >
-                <Text style={styles.eliminar}>{"\u{1F5D1}"}</Text>
+                <Text style={styles.eliminar}>
+                  {"\u{1F5D1}"}
+                </Text>
               </TouchableOpacity>
             </View>
           )}
@@ -117,81 +145,127 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   body: {
-    backgroundColor: "#000",
     flex: 1,
+    backgroundColor: "#0b1f12",
     alignItems: "center",
     justifyContent: "flex-start",
-    gap: 10,
-    padding: 20,
+    paddingHorizontal: 16,
+    paddingTop: 32,
+    gap: 16,
   },
+
+button: {
+    backgroundColor: "#fef9c3",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginVertical: 10,
+  },
+
   imagen: {
-    width: 400,
-    height: 90,
+    width: 260,
+    height: 70,
     resizeMode: "contain",
+    marginBottom: 8,
   },
+
   contenedor: {
-    backgroundColor: "#164f1e",
-    width: 300,
+    width: "100%",
+    maxWidth: 360,
+    backgroundColor: "#14532d",
+    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
     alignItems: "center",
-    marginTop: 40,
-    gap: 10,
-    padding: 17,
-    borderRadius:30
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    elevation: 6,
   },
+
   titulo: {
-    color: "#f1f2d2",
-    fontSize: 23,
-    fontStyle: "italic",
+    color: "#fef9c3",
+    fontSize: 22,
     fontWeight: "bold",
+    textAlign: "center",
   },
+
   contRegistro: {
-    gap: 7,
-    width:'80%'
+    width: "100%",
+    gap: 10,
   },
+
   input: {
-    backgroundColor: "#daecbb",
-    color: "#000",
-    padding: 3,
-    
+    backgroundColor: "#e5f4df",
+    color: "#052e16",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+    fontSize: 14,
   },
-  picker:{
-    backgroundColor: "#daecbb",
-    height:40,
-    padding:0
+
+  picker: {
+    backgroundColor: "#e5f4df",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+    height: 44,
   },
+
   mensaje: {
-    color: "#fff",
+    marginTop: 8,
+    color: "#e5f4df",
+    fontSize: 14,
   },
+
   tabla: {
-    backgroundColor: "#497f23",
-    padding: 5,
-    width: 300,
+    width: "95%",
+    maxWidth: 420,
+    backgroundColor: "#14532d",
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
     alignItems: "center",
-    paddingBottom:20,
-    borderRadius:30
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    elevation: 5,
   },
+
   fila: {
     flexDirection: "row",
-    margin: 0,
     alignItems: "center",
-    width: 250,
-    borderWidth: 1,
+    width: "100%",
+    borderBottomWidth: 1,
+    borderColor: "rgba(229, 244, 223, 0.25)",
+    paddingHorizontal: 8,
+    paddingVertical: 7,
   },
-  encabezado: {
-    width: "25%",
-    fontWeight: "bold",
-    color: "#f1f2d2",
-    textAlign: "center",
 
-    paddingVertical: 8,
+  encabezado: {
+    flex: 1,
+    fontWeight: "bold",
+    color: "#fef9c3",
+    textAlign: "center",
+    paddingVertical: 10,
+    fontSize: 13,
   },
+
   columna: {
-    width: "25%",
+    flex: 1,
     textAlign: "center",
     paddingVertical: 8,
+    fontSize: 12,
+    color: "#f9fafb",
   },
+
   eliminar: {
-    fontSize: 28,
-    color: "#ff0000",
+    fontSize: 26,
+    color: "#ef4444",
   },
 });

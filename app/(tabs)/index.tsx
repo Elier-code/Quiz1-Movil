@@ -1,4 +1,3 @@
-
 import {
   StyleSheet,
   View,
@@ -7,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useState } from "react";
@@ -25,19 +25,22 @@ export default function HomeScreen() {
   const [tipoDis, setTipoDis] = useState("");
   const [lista, setLista] = useState<Dispositivo[]>([]);
   const [contador, setContador] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [mostrar, setMostrar] = useState(false);
+  const [texto, setTexto] = useState("Ver Tabla");
 
   const registrar = () => {
     if (dispositivo === "" && tipoDis === "") {
       alert("Complete todos los campos");
     } else {
       const n = lista.length + 1;
+      iniciarProceso();
 
       const newDisp = {
         id: contador,
         nombre: dispositivo,
         tipo: tipoDis,
       };
-
       setLista([...lista, newDisp]);
       setMensaje("Hay " + n + " dispositivos registrados");
     }
@@ -48,19 +51,24 @@ export default function HomeScreen() {
   };
 
   const eliminar = (id: number) => {
-    const nuevaLista = lista.filter(
-      (item: Dispositivo) => item.id !== id
-    );
+    const nuevaLista = lista.filter((item: Dispositivo) => item.id !== id);
 
     if (nuevaLista.length !== 0) {
-      setMensaje(
-        "Hay " + nuevaLista.length + " dispositivos registrados"
-      );
+      setMensaje("Hay " + nuevaLista.length + " dispositivos registrados");
     } else {
       setMensaje(text);
     }
 
     setLista(nuevaLista);
+  };
+
+  const iniciarProceso = () => {
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      alert("Fue guardado correctamente");
+    }, 2000);
   };
 
   return (
@@ -83,14 +91,9 @@ export default function HomeScreen() {
 
           <Picker
             selectedValue={tipoDis}
-            onValueChange={(itemValue: string) =>
-              setTipoDis(itemValue)
-            }
+            onValueChange={(itemValue: string) => setTipoDis(itemValue)}
           >
-            <Picker.Item
-              label="Seleccione tipo de dispositivo"
-              value=""
-            />
+            <Picker.Item label="Seleccione tipo de dispositivo" value="" />
             <Picker.Item label="Portatil" value="Portatil" />
             <Picker.Item label="Celular" value="Celular" />
             <Picker.Item label="Tablet" value="Tablet" />
@@ -100,14 +103,34 @@ export default function HomeScreen() {
         <TouchableOpacity onPress={registrar} style={styles.button}>
           <Text>Registrar</Text>
         </TouchableOpacity>
+        {loading && (
+          <ActivityIndicator
+            size="large"
+            color="#6200EE"
+            style={{ marginTop: 20 }}
+          />
+        )}
       </View>
 
       <Text style={styles.mensaje}>{mensaje}</Text>
+      <TouchableOpacity
+        onPress={() => {
+          if (lista.length === 0 && mostrar === false) {
+            alert("No hay datos que mostrar");
+            setTexto("Ver Tabla");
+          } else {
+            const nuevoEstado = !mostrar;
+            setMostrar(!mostrar);
+            setTexto(nuevoEstado ? "Ocultar Tabla" : "Ver Tabla");
+          }
+        }}
+        style={styles.button}
+      >
+        <Text>{texto}</Text>
+      </TouchableOpacity>
 
-      <View style={styles.tabla}>
-        <Text style={[styles.titulo, { margin: 10 }]}>
-          Registro
-        </Text>
+      <View style={[styles.tabla, { display: mostrar ? "flex" : "none" }]}>
+        <Text style={[styles.titulo, { margin: 10 }]}>Registro</Text>
 
         <View style={styles.fila}>
           <Text style={styles.encabezado}>Id</Text>
@@ -118,9 +141,7 @@ export default function HomeScreen() {
 
         <FlatList<Dispositivo>
           data={lista}
-          keyExtractor={(item: Dispositivo) =>
-            item.id.toString()
-          }
+          keyExtractor={(item: Dispositivo) => item.id.toString()}
           renderItem={({ item }: { item: Dispositivo }) => (
             <View style={styles.fila}>
               <Text style={styles.columna}>{item.id}</Text>
@@ -131,9 +152,7 @@ export default function HomeScreen() {
                 style={{ flex: 1, alignItems: "center" }}
                 onPress={() => eliminar(item.id)}
               >
-                <Text style={styles.eliminar}>
-                  {"\u{1F5D1}"}
-                </Text>
+                <Text style={styles.eliminar}>{"\u{1F5D1}"}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -154,7 +173,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
 
-button: {
+  button: {
     backgroundColor: "#fef9c3",
     borderRadius: 10,
     paddingVertical: 10,
@@ -240,11 +259,10 @@ button: {
   fila: {
     flexDirection: "row",
     alignItems: "center",
-    width: "100%",
+    width: 420,
     borderBottomWidth: 1,
     borderColor: "rgba(229, 244, 223, 0.25)",
-    paddingHorizontal: 8,
-    paddingVertical: 7,
+    justifyContent: "space-between",
   },
 
   encabezado: {

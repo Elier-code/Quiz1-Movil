@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useState } from "react";
@@ -30,7 +31,7 @@ export default function HomeScreen() {
   const [texto, setTexto] = useState("Ver Tabla");
 
   const registrar = () => {
-    if (dispositivo === "" && tipoDis === "") {
+    if (dispositivo === "" || tipoDis === "") {
       alert("Complete todos los campos");
     } else {
       const n = lista.length + 1;
@@ -73,91 +74,103 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.body}>
-      <Image
-        source={require("../../assets/images/cecar.png")}
-        style={styles.imagen}
-      />
-
-      <View style={styles.contenedor}>
-        <Text style={styles.titulo}>Registro de dispositivos</Text>
-
-        <View style={styles.contRegistro}>
-          <TextInput
-            placeholder="Nombre Dispositivo"
-            value={dispositivo}
-            onChangeText={setDispositivo}
-            style={styles.input}
-          />
-
-          <Picker
-            selectedValue={tipoDis}
-            onValueChange={(itemValue: string) => setTipoDis(itemValue)}
-          >
-            <Picker.Item label="Seleccione tipo de dispositivo" value="" />
-            <Picker.Item label="Portatil" value="Portatil" />
-            <Picker.Item label="Celular" value="Celular" />
-            <Picker.Item label="Tablet" value="Tablet" />
-          </Picker>
-        </View>
-
-        <TouchableOpacity onPress={registrar} style={styles.button}>
-          <Text>Registrar</Text>
-        </TouchableOpacity>
-        {loading && (
-          <ActivityIndicator
-            size="large"
-            color="#6200EE"
-            style={{ marginTop: 20 }}
-          />
-        )}
-      </View>
-
-      <Text style={styles.mensaje}>{mensaje}</Text>
-      <TouchableOpacity
-        onPress={() => {
-          if (lista.length === 0 && mostrar === false) {
-            alert("No hay datos que mostrar");
-            setTexto("Ver Tabla");
-          } else {
-            const nuevoEstado = !mostrar;
-            setMostrar(!mostrar);
-            setTexto(nuevoEstado ? "Ocultar Tabla" : "Ver Tabla");
-          }
+      <ScrollView
+        style={{ width: "100%", height: "100%" }}
+        contentContainerStyle={{
+          alignItems: "center",
+          gap: 16,
+          paddingHorizontal: 16,
+          paddingBottom: 24,
+          flexDirection: "column",
+          width: "100%",
         }}
-        style={styles.button}
       >
-        <Text>{texto}</Text>
-      </TouchableOpacity>
+        <Image
+          source={require("../../assets/images/cecar.png")}
+          style={styles.imagen}
+        />
 
-      <View style={[styles.tabla, { display: mostrar ? "flex" : "none" }]}>
-        <Text style={[styles.titulo, { margin: 10 }]}>Registro</Text>
+        <View style={styles.contenedor}>
+          <Text style={styles.titulo}>Registro de dispositivos</Text>
 
-        <View style={styles.fila}>
-          <Text style={styles.encabezado}>Id</Text>
-          <Text style={styles.encabezado}>Nombre</Text>
-          <Text style={styles.encabezado}>Tipo</Text>
-          <Text style={styles.encabezado}>Eliminar</Text>
+          <View style={styles.contRegistro}>
+            <TextInput
+              placeholder="Nombre Dispositivo"
+              value={dispositivo}
+              onChangeText={setDispositivo}
+              style={styles.input}
+            />
+
+            <Picker
+              selectedValue={tipoDis}
+              onValueChange={(itemValue: string) => setTipoDis(itemValue)}
+            >
+              <Picker.Item label="Seleccione tipo de dispositivo" value="" />
+              <Picker.Item label="Portatil" value="Portatil" />
+              <Picker.Item label="Celular" value="Celular" />
+              <Picker.Item label="Tablet" value="Tablet" />
+            </Picker>
+          </View>
+
+          <TouchableOpacity onPress={registrar} style={styles.button}>
+            <Text>Registrar</Text>
+          </TouchableOpacity>
+          {loading && (
+            <ActivityIndicator
+              size="large"
+              color="#6200EE"
+              style={{ marginTop: 20 }}
+            />
+          )}
         </View>
 
-        <FlatList<Dispositivo>
-          data={lista}
-          keyExtractor={(item: Dispositivo) => item.id.toString()}
-          renderItem={({ item }: { item: Dispositivo }) => (
-            <View style={styles.fila}>
-              <Text style={styles.columna}>{item.id}</Text>
-              <Text style={styles.columna}>{item.nombre}</Text>
-              <Text style={styles.columna}>{item.tipo}</Text>
+        <Text style={styles.mensaje}>{mensaje}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            if (lista.length === 0 && mostrar === false) {
+              alert("No hay datos que mostrar");
+              setTexto("Ver Tabla");
+            } else {
+              const nuevoEstado = !mostrar;
+              setMostrar(!mostrar);
+              setTexto(nuevoEstado ? "Ocultar Tabla" : "Ver Tabla");
+            }
+          }}
+          style={styles.button}
+        >
+          <Text>{texto}</Text>
+        </TouchableOpacity>
 
-              <TouchableOpacity
-                style={{ flex: 1, alignItems: "center" }}
-                onPress={() => eliminar(item.id)}
-              >
-                <Text style={styles.eliminar}>{"\u{1F5D1}"}</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        />
-      </View>
+        <View style={[styles.tabla, { display: mostrar ? "flex" : "none" }]}>
+          <Text style={[styles.titulo, { margin: 10 }]}>Registro</Text>
+
+          <View style={styles.fila}>
+            <Text style={styles.encabezado}>Id</Text>
+            <Text style={styles.encabezado}>Nombre</Text>
+            <Text style={styles.encabezado}>Tipo</Text>
+            <Text style={styles.encabezado}>Eliminar</Text>
+          </View>
+
+          <FlatList<Dispositivo>
+            data={lista}
+            keyExtractor={(item: Dispositivo) => item.id.toString()}
+            renderItem={({ item }: { item: Dispositivo }) => (
+              <View style={styles.fila}>
+                <Text style={styles.columna}>{item.id}</Text>
+                <Text style={styles.columna}>{item.nombre}</Text>
+                <Text style={styles.columna}>{item.tipo}</Text>
+
+                <TouchableOpacity
+                  style={{ flex: 1, alignItems: "center" }}
+                  onPress={() => eliminar(item.id)}
+                >
+                  <Text style={styles.eliminar}>{"\u{1F5D1}"}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -259,7 +272,7 @@ const styles = StyleSheet.create({
   fila: {
     flexDirection: "row",
     alignItems: "center",
-    width: 420,
+    width: 250,
     borderBottomWidth: 1,
     borderColor: "rgba(229, 244, 223, 0.25)",
     justifyContent: "space-between",
